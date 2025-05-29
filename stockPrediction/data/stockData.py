@@ -1,4 +1,3 @@
-import os
 import yfinance as yf
 
 stockList = ["AAPL"]
@@ -12,7 +11,7 @@ def download_stock_data(ticker, start="2015-01-01", end="2025-01-01"):
 
     # Save the DataFrame to a CSV file
     # Replace the old data with the new data if it already exist (index=False)
-    df.to_csv(f"data/csv/{stock}.csv", index=False)
+    df.to_csv(f"stockPrediction/data/csv/{stock}.csv", index=False)
 
     print(df)
 
