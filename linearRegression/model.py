@@ -1,7 +1,3 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from stockPrediction.graph import plot
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,13 +10,18 @@ def getTrainData(stock, year):
     yTrain = df['Close'].values                 #Closing Price
 
     w_init = 0
-    b_init = 0
+    b_init = 15
 
     iterations = 10000
-    temp_alpha = 0.001
+    alpha = 0.00000001
 
-    w_final, b_final, J_hist, p_hist = gradientDescent(xTrain, yTrain, w_init, b_init, temp_alpha, iterations,
+    w_final, b_final, J_hist, p_hist = gradientDescent(xTrain, yTrain, w_init, b_init, alpha, iterations,
 computeCost, computeGradient)
+    
+    print(f"Cost {J_hist[-1]} ",
+        f"w: {w_final}, b: {b_final}")
+    
+    plot.loadData(stock, year, w_final, b_final)
 
 # We are going to use f_wb(x^(i)) = wx^(i) + b to predict the data
 def computeModelOutput(xTrain, w, b):   # w is the slope, b is the y-intercept, xTrain is the days
@@ -86,8 +87,7 @@ def gradientDescent(xTrain, yTrain, w_in, b_in, alpha, numberIterations, compute
             
     return w, b, J_history, p_history
 
-#So if the derivative is negative, it means the prediction line (f_wb) is  below our points, while if the derivative is positive, it means the prediction line (f_wb) is above our points.
-getTrainData("AAPL", 2017)
+getTrainData("AAPL", 2016)
 
 
 # plot.loadData("AAPL", 2015)
