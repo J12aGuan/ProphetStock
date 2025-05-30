@@ -4,7 +4,7 @@ import matplotlib.ticker as ticker
 import os
 
 # Load the data
-def loadData(stock, year):
+def loadData(stock, year, w, b):
     filePath = f"stockPrediction/data/csv/{stock}/{year} {stock}.csv"
 
     if not os.path.exists(filePath):
@@ -15,15 +15,20 @@ def loadData(stock, year):
     # Convert the 'Date' column to datetime format
     df['Date'] = pd.to_datetime(df['Date'])
 
-    plot(stock, year, df)
+    plot(stock, year, w, b, df)
 
-def plot(stock, year, df):
+def plot(stock, year, w, b, df):
+    dateList = df['Date']
+    predictionPriceList = [w * day + b for day in range(1, df.shape[0] + 1)]
+    actualPriceList = df['Close']
+
     # Plot
     plt.figure(figsize=(10, 5))  # width, height in inches
 
     # Plot the closing price over time
     # 'label' here is for the legend (not axis labels)
-    plt.plot(df['Date'], df['Close'], label=f'{year} {stock} Closing Price', linewidth=1.5)
+    plt.plot(dateList, actualPriceList, label=f'{year} {stock} Closing Price', linewidth=1.5)
+    plt.plot(dateList, predictionPriceList, label=f'{year} {stock} Anticipated Closing Price', linewidth=1.5)
 
     # Set labels for the x and y axes
     plt.xlabel("Date")              # X-axis label
