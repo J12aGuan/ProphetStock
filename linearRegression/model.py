@@ -1,8 +1,11 @@
-from stockPrediction.graph import plot
+from stockPrediction.graph import graph
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import math
+from datetime import datetime
+
+currentYear = datetime.now().year
+years = [(currentYear) - x for x in list(range(11))]
 
 def getTrainData(stock, year):
     filePath = f"stockPrediction/data/csv/{stock}/{year} {stock}.csv"
@@ -14,7 +17,7 @@ def getTrainData(stock, year):
     w_init = 0
     b_init = np.mean(yTrain)
 
-    iterations = 20000
+    iterations = 10000
     alpha = 0.0001
 
     w_final, b_final, J_hist, p_hist = gradientDescent(
@@ -32,17 +35,7 @@ def getTrainData(stock, year):
     print(f"Adjusted intercept (original space): {true_b}")
 
     # Plot using original slope and adjusted intercept
-    plot.loadData(stock, year, w_final, true_b)
-
-
-# We are going to use f_wb(x^(i)) = wx^(i) + b to predict the data
-def computeModelOutput(xTrain, w, b):   # w is the slope, b is the y-intercept, xTrain is the days
-    dataAmount = xTrain.shape[0]        # shape[0] gets the length of the array
-    f_wb = np.zeros(dataAmount)         # Creates an array, initalized with all entries in the array with 0. Entry length is the (dataAmount)
-    for i in range(dataAmount):
-        f_wb[i] = w * xTrain[i] + b     # Sets each entry in the array with the prediction --> w * xTrain[i] + b
-
-    return f_wb
+    graph.graphFigures(stock, year, w_final, true_b)
 
 def computeCost(xTrain, yTrain, w, b):
     dataAmount = xTrain.shape[0]
@@ -99,16 +92,9 @@ def gradientDescent(xTrain, yTrain, w_in, b_in, alpha, numberIterations, compute
             
     return w, b, J_history, p_history
 
-getTrainData("AAPL", 2022)
+for year in years:
+    getTrainData("AAPL", year)
 
-
-# plot.loadData("AAPL", 2015)
-# plot.loadData("AAPL", 2016)
-# plot.loadData("AAPL", 2017)
-# plot.loadData("AAPL", 2018)
-# plot.loadData("AAPL", 2019)
-# plot.loadData("AAPL", 2020)
-# plot.loadData("AAPL", 2021)
-# plot.loadData("AAPL", 2022)
+graph.showGraph()
 
 # python -m linearRegression.model
