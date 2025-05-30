@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from stockPrediction.graph import plot
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -83,7 +87,7 @@ def gradientDescent(xTrain, yTrain, w_in, b_in, alpha, numberIterations, compute
     return w, b, J_history, p_history
 
 #So if the derivative is negative, it means the prediction line (f_wb) is  below our points, while if the derivative is positive, it means the prediction line (f_wb) is above our points.
-getTrainData("AAPL", 2016)
+getTrainData("AAPL", 2017)
 
 
 # plot.loadData("AAPL", 2015)
