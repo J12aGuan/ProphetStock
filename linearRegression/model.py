@@ -2,26 +2,38 @@ from stockPrediction.graph import plot
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import math
 
 def getTrainData(stock, year):
     filePath = f"stockPrediction/data/csv/{stock}/{year} {stock}.csv"
     df = pd.read_csv(filePath)
     xTrain = np.array(range(df.shape[0])) + 1   #Date
+    xTrainCentered = xTrain - np.mean(xTrain)
     yTrain = df['Close'].values                 #Closing Price
 
     w_init = 0
-    b_init = 15
+    b_init = np.mean(yTrain)
 
-    iterations = 10000
-    alpha = 0.00000001
+    iterations = 20000
+    alpha = 0.0001
 
-    w_final, b_final, J_hist, p_hist = gradientDescent(xTrain, yTrain, w_init, b_init, alpha, iterations,
-computeCost, computeGradient)
-    
+    w_final, b_final, J_hist, p_hist = gradientDescent(
+        xTrainCentered, yTrain, w_init, b_init, alpha, iterations,
+        computeCost, computeGradient
+    )
+
+    # Convert centered model back to original scale
+    x_mean = np.mean(np.array(range(df.shape[0])) + 1)  # mean of uncentered xTrain
+    true_b = -w_final * x_mean + b_final
+
+    # Print both for comparison
     print(f"Cost {J_hist[-1]} ",
-        f"w: {w_final}, b: {b_final}")
-    
-    plot.loadData(stock, year, w_final, b_final)
+        f"w (slope): {w_final}, b (intercept in centered space): {b_final}")
+    print(f"Adjusted intercept (original space): {true_b}")
+
+    # Plot using original slope and adjusted intercept
+    plot.loadData(stock, year, w_final, true_b)
+
 
 # We are going to use f_wb(x^(i)) = wx^(i) + b to predict the data
 def computeModelOutput(xTrain, w, b):   # w is the slope, b is the y-intercept, xTrain is the days
@@ -87,7 +99,7 @@ def gradientDescent(xTrain, yTrain, w_in, b_in, alpha, numberIterations, compute
             
     return w, b, J_history, p_history
 
-getTrainData("AAPL", 2016)
+getTrainData("AAPL", 2022)
 
 
 # plot.loadData("AAPL", 2015)
@@ -98,3 +110,5 @@ getTrainData("AAPL", 2016)
 # plot.loadData("AAPL", 2020)
 # plot.loadData("AAPL", 2021)
 # plot.loadData("AAPL", 2022)
+
+# python -m linearRegression.model
