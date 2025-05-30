@@ -1,11 +1,15 @@
 import yfinance as yf
 import pandas as pd
+import os
+from datetime import datetime
 
+currentYear = datetime.now().year
+years = [(currentYear) - x for x in list(range(11))]
 stockList = ["AAPL"]
 
-def download_stock_data(ticker, start="2015-01-01", end="2025-01-01"):
+def download_stock_data(ticker, year):
     # Download historical stock data for a given ticker symbol
-    df = yf.download(ticker, start=start, end=end)
+    df = yf.download(ticker, start=f"{year}-01-01", end=f"{year + 1}-01-01")
 
     # Flatten MultiIndex columns if they exist
     if isinstance(df.columns, pd.MultiIndex):
@@ -17,11 +21,15 @@ def download_stock_data(ticker, start="2015-01-01", end="2025-01-01"):
     # Add the ticker as a new column (safe and clean)
     df['Ticker'] = ticker
 
+    # Build the folder path
+    folderPath = f"stockPrediction/data/csv/{stock}"
+    # Create the folder if it doesn't exist
+    os.makedirs(folderPath, exist_ok=True)
+
     # Save the DataFrame to a CSV file
     # Replace the old data with the new data if it already exist (index=False)
-    df.to_csv(f"stockPrediction/data/csv/{stock}.csv", index=False)
-
-    print(df)
+    df.to_csv(f"{folderPath}/{year} {stock}.csv", index=False)
 
 for stock in stockList:
-    download_stock_data(ticker=stock)
+    for year in years:
+        download_stock_data(stock, year)
