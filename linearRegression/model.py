@@ -7,93 +7,81 @@ from datetime import datetime
 currentYear = datetime.now().year
 years = [(currentYear) - x for x in list(range(11))]
 
-def getTrainData(stock, year):
-    filePath = f"stockPrediction/data/csv/{stock}/{year} {stock}.csv"
-    df = pd.read_csv(filePath)
-    xTrain = np.array(range(df.shape[0])) + 1   #Date
-    xTrainCentered = xTrain - np.mean(xTrain)
-    yTrain = df['Close'].values                 #Closing Price
+class linearRegression:
+    def __init__(self, stock, year, iterations, alpha):
+        self.stock = stock
+        self.year = year
+        self.filePath = f"stockPrediction/data/csv/{self.stock}/{self.year} {self.stock}.csv"
+        self.df = pd.read_csv(self.filePath)
+        self.xTrain = np.array(range(self.df.shape[0])) + 1     #Date
+        self.xTrainCentered = self.xTrain - np.mean(self.xTrain)
+        self.yTrain = self.df['Close'].values                   #Closing Price
+        self.w = 0
+        self.b = np.mean(self.yTrain)
+        self.iterations = iterations
+        self.alpha = alpha
+        self.J_history = []     #Total cost history
+        self.p_history = []     #History of parameters [w, b]
 
-    w_init = 0
-    b_init = np.mean(yTrain)
-
-    iterations = 10000
-    alpha = 0.0001
-
-    w_final, b_final, J_hist, p_hist = gradientDescent(
-        xTrainCentered, yTrain, w_init, b_init, alpha, iterations,
-        computeCost, computeGradient
-    )
-
-    # Convert centered model back to original scale
-    x_mean = np.mean(np.array(range(df.shape[0])) + 1)  # mean of uncentered xTrain
-    true_b = -w_final * x_mean + b_final
-
-    # Print both for comparison
-    print(f"Cost {J_hist[-1]} ",
-        f"w (slope): {w_final}, b (intercept in centered space): {b_final}")
-    print(f"Adjusted intercept (original space): {true_b}")
-
-    # Plot using original slope and adjusted intercept
-    graph.graphFigures(stock, year, w_final, true_b)
-
-def computeCost(xTrain, yTrain, w, b):
-    dataAmount = xTrain.shape[0]
+    def computeCost(self):
+        dataAmount = self.xTrainCentered.shape[0]
     
-    costSum = 0
-    for i in range(dataAmount):
-        f_wb = w * xTrain[i] + b
-        cost = (f_wb - yTrain[i])**2    #It is sum of squares due to Error (SSE)
-        costSum = costSum + cost
-    totalCost = (1/(2 * dataAmount) * costSum) # It's just a formula :( idk how to explain it
-    
-    return totalCost # This is J(w,b)
-
-def computeGradient(xTrain, yTrain, w, b):
-    dataAmount = xTrain.shape[0]
-
-    dj_dw = 0
-    dj_db = 0
-
-    for i in range(dataAmount):
-        f_wb = w * xTrain[i] + b
-        dj_dw_i = (f_wb - yTrain[i]) * xTrain[i]
-        dj_db_i = (f_wb - yTrain[i])
-        dj_dw += dj_dw_i
-        dj_db += dj_db_i
-
-    dj_dw = dj_dw / dataAmount  #dj_dw is the change in total cost due to change in slope
-    dj_db = dj_db / dataAmount  #dj_db is the change in total cost due to the change in the y-intercept
-    
-    return dj_dw, dj_db
-
-def gradientDescent(xTrain, yTrain, w_in, b_in, alpha, numberIterations, computeCost, computeGradient):
-    J_history = []  #Total cost history
-    p_history = []  #History of parameters [w, b]
-    b = b_in
-    w = w_in
-    
-    for i in range(numberIterations):
-        dj_dw, dj_db = computeGradient(xTrain, yTrain, w, b)
-        w = w - alpha * dj_dw
-        b = b - alpha * dj_db
-
+        costSum = 0
+        for i in range(dataAmount):
+            f_wb = self.w * self.xTrainCentered[i] + self.b
+            cost = (f_wb - self.yTrain[i])**2    #It is sum of squares due to Error (SSE)
+            costSum = costSum + cost
+        totalCost = (1/(2 * dataAmount) * costSum)
         
-        #Save total cost J at each iteration
-        if i < 100000:
-            J_history.append(computeCost(xTrain, yTrain, w, b))     #History of total cost
-            p_history.append([w, b])                                #History of parameters [w, b]
+        return totalCost # This is J(w,b)
+    
+    def computeGradient(self):
+        dataAmount = self.xTrainCentered.shape[0]
 
-        #Print the result every ten time we interate
-        if i % (numberIterations / 10) == 0:
-            print(f"Iteration {i}: Cost {J_history[-1]} ",
-                f"dj_dw: {dj_dw}, dj_db: {dj_db} ",
-                f"w: {w}, b: {b}")
+        dj_dw = 0
+        dj_db = 0
+
+        for i in range(dataAmount):
+            f_wb = self.w * self.xTrainCentered[i] + self.b
+            dj_dw_i = (f_wb - self.yTrain[i]) * self.xTrainCentered[i]
+            dj_db_i = (f_wb - self.yTrain[i])
+            dj_dw += dj_dw_i
+            dj_db += dj_db_i
+
+        dj_dw = dj_dw / dataAmount  #dj_dw is the change in total cost due to change in slope
+        dj_db = dj_db / dataAmount  #dj_db is the change in total cost due to the change in the y-intercept
+        
+        return dj_dw, dj_db
+    
+    def gradientDescent(self):        
+        for i in range(self.iterations):
+            dj_dw, dj_db = self.computeGradient()
+            self.w = self.w - self.alpha * dj_dw
+            self.b = self.b - self.alpha * dj_db
+
             
-    return w, b, J_history, p_history
+            #Save total cost J at each iteration
+            if i < 100000:
+                self.J_history.append(self.computeCost())     # History of total cost
+                self.p_history.append([self.w, self.b])       # History of parameters [w, b]
+
+            #Print the result every ten time we interate
+            if i % (self.iterations / 10) == 0:
+                print(f"Iteration {i}: Cost {self.J_history[-1]} ",
+                    f"dj_dw: {dj_dw}, dj_db: {dj_db} ",
+                    f"w: {self.w}, b: {self.b}")
+                
+        x_mean = np.mean(np.array(range(self.df.shape[0])) + 1)  # mean of uncentered xTrain
+        self.b = -self.w * x_mean + self.b     # Adjusted intercept
+                
+        return self.w, self.b, self.J_history, self.p_history
 
 for year in years:
-    getTrainData("AAPL", year)
+    linearRegressionObj = linearRegression("AAPL", year, 10000, 0.0001)
+    w_final, b_final, J_hist, p_hist = linearRegressionObj.gradientDescent()
+
+    # Plot using slope and adjusted intercept
+    graph.storePlotData(linearRegressionObj.stock, linearRegressionObj.year, w_final, b_final)
 
 graph.showGraph()
 

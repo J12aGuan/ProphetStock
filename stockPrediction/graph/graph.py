@@ -8,7 +8,7 @@ current = [0]  # mutable index
 fig, ax = plt.subplots()
 
 # Build your plot objects (store data, not rendered figures)
-def graphFigures(stock, year, w, b):
+def storePlotData(stock, year, w, b):
     plotObj = Plot(stock, year, w, b)
     plots.append(plotObj)
 
