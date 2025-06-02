@@ -1,21 +1,12 @@
-from stockPrediction.graph import graph
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from datetime import datetime
-
-currentYear = datetime.now().year
-years = [(currentYear) - x for x in list(range(11))]
 
 class linearRegression:
-    def __init__(self, stock, year, iterations, alpha):
-        self.stock = stock
-        self.year = year
-        self.filePath = f"stockPrediction/data/csv/{self.stock}/{self.year} {self.stock}.csv"
-        self.df = pd.read_csv(self.filePath)
-        self.xTrain = np.array(range(self.df.shape[0])) + 1     #Date
+    def __init__(self, X, y, iterations, alpha):
+        self.xTrain = X
         self.xTrainCentered = self.xTrain - np.mean(self.xTrain)
-        self.yTrain = self.df['Close'].values                   #Closing Price
+        self.yTrain = y
         self.w = 0
         self.b = np.mean(self.yTrain)
         self.iterations = iterations
@@ -71,18 +62,7 @@ class linearRegression:
                     f"dj_dw: {dj_dw}, dj_db: {dj_db} ",
                     f"w: {self.w}, b: {self.b}")
                 
-        x_mean = np.mean(np.array(range(self.df.shape[0])) + 1)  # mean of uncentered xTrain
+        x_mean = np.mean(self.xTrain)  # mean of uncentered xTrain
         self.b = -self.w * x_mean + self.b     # Adjusted intercept
                 
         return self.w, self.b, self.J_history, self.p_history
-
-for year in years:
-    linearRegressionObj = linearRegression("AAPL", year, 10000, 0.0001)
-    w_final, b_final, J_hist, p_hist = linearRegressionObj.gradientDescent()
-
-    # Plot using slope and adjusted intercept
-    graph.storePlotData(linearRegressionObj.stock, linearRegressionObj.year, w_final, b_final)
-
-graph.showGraph()
-
-# python -m linearRegression.model

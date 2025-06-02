@@ -15,14 +15,26 @@ def download_stock_data(ticker, year):
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = df.columns.get_level_values(0)
 
-    # Select only the 'Close' price
-    df = df[['Close']].reset_index()
+    # Add Previous Day's Close
+    df['PrevClose'] = df['Close'].shift(1)
+
+    # Add Daily Price Range
+    df['Range'] = df['High'] - df['Low']
+
+    # Add 3-day moving average
+    df['MA3'] = df['Close'].rolling(window=3).mean()
 
     # Add the ticker as a new column (safe and clean)
     df['Ticker'] = ticker
 
+    # Add Date
+    df.reset_index(inplace=True)
+
+    # Remove the first two row
+    df.dropna(inplace=True)
+
     # Build the folder path
-    folderPath = f"stockPrediction/data/csv/{stock}"
+    folderPath = f"csv/{stock}"
     # Create the folder if it doesn't exist
     os.makedirs(folderPath, exist_ok=True)
 
