@@ -30,9 +30,6 @@ def download_stock_data(ticker, year):
     # Add Date
     df.reset_index(inplace=True)
 
-    # Remove the first two row
-    df.dropna(inplace=True)
-
     # Build the folder path
     folderPath = f"csv/{stock}"
     # Create the folder if it doesn't exist
