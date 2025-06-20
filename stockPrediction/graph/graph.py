@@ -1,21 +1,19 @@
 # graph.py
 
 import matplotlib.pyplot as plt
-from stockPrediction.graph.plotData import Plot
 
 plots = []
 current = [0]  # mutable index
 fig, ax = plt.subplots()
 
-# Build your plot objects (store data, not rendered figures)
-def storePlotData(stock, year, w, b):
-    plotObj = Plot(stock, year, w, b)
-    plots.append(plotObj)
+# Build plot objects (store data, not rendered figures)
+def storePlotData(plotData):
+    plots.append(plotData)
 
 def updatePlot(ax):
     ax.clear()
     plot = plots[current[0]]
-    dates, actual, predicted = plot.getPlotData()
+    dates, actual, predicted = plot.dates, plot.actual, plot.predicted
 
     ax.plot(dates, actual, label="Actual Closing Price")
     ax.plot(dates, predicted, label="Predicted Closing Price", linestyle='--')

@@ -1,4 +1,6 @@
-from randomForest.forest import randomForest
+from randomForest.classification.forest import randomForest
+from stockPrediction.graph import graph
+from stockPrediction.graph.plotData import plotData
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -11,7 +13,7 @@ for year in years:
     filePath = f"stockPrediction/data/csv/AAPL/{year} AAPL.csv"
     df = pd.read_csv(filePath)
 
-    # Remove the first two row
+    # Remove the first two row and the last row
     df.dropna(inplace=True)
 
     # Prepare features and labels
@@ -31,12 +33,17 @@ for year in years:
     y_test = y[splitIndex:]         # 20%
 
 
-    y_result = []
+    y_preds = []
     randomForestObj = randomForest(num_trees=20).fit(X_train, y_train)
-    for X_individual in X_test:
+    for X_individual in X:
         y_pred = randomForestObj.predict(X_individual)
-        y_result.append(y_pred)
+        y_preds.append(y_pred)
 
-    print(y_result)
+    # Plot result
+    plotObj = plotData("AAPL", year)
+    plotObj.getRandomForestPlotData(y_preds)
+    graph.storePlotData(plotObj)
+
+graph.showGraph()
 
 # python -m randomForest.train

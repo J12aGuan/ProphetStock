@@ -1,5 +1,6 @@
 from linearRegression.model import linearRegression
 from stockPrediction.graph import graph
+from stockPrediction.graph.plotData import plotData
 from datetime import datetime
 import pandas as pd
 import numpy as np
@@ -21,7 +22,9 @@ for year in years:
     w, b, J_hist, p_hist = model.gradientDescent()
 
     # Plot result
-    graph.storePlotData("AAPL", year, w, b)
+    plotObj = plotData("AAPL", year)
+    plotObj.getLinearRegressionPlotData(w, b)
+    graph.storePlotData(plotObj)
 
 graph.showGraph()
 
