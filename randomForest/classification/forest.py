@@ -1,5 +1,5 @@
-from randomForest.utils import rowBagging, classify
-from randomForest.model import buildTree
+from randomForest.classification.utils import rowBagging, classify
+from randomForest.classification.model import buildTree
 
 class randomForest():
     def __init__(self, num_trees):

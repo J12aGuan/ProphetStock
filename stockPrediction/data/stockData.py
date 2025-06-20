@@ -24,20 +24,23 @@ def download_stock_data(ticker, year):
     # Add 3-day moving average
     df['MA3'] = df['Close'].rolling(window=3).mean()
 
-    # Add the ticker as a new column (safe and clean)
+    # Add tomorrow’s price
+    df["Target"] = df["Close"].shift(-1)
+
+    # Add the ticker as a new column
     df['Ticker'] = ticker
 
     # Add Date
     df.reset_index(inplace=True)
 
     # Build the folder path
-    folderPath = f"csv/{stock}"
+    folderPath = f"csv/{ticker}"
     # Create the folder if it doesn't exist
     os.makedirs(folderPath, exist_ok=True)
 
     # Save the DataFrame to a CSV file
     # Replace the old data with the new data if it already exist (index=False)
-    df.to_csv(f"{folderPath}/{year} {stock}.csv", index=False)
+    df.to_csv(f"{folderPath}/{year} {ticker}.csv", index=False)
 
 for stock in stockList:
     for year in years:
